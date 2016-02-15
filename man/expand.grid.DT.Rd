@@ -22,7 +22,8 @@ A data.table with all possible combinations (Cartesian product)
    of the elements in the input vector sequences.
 }
 \description{
-Expand.grid (\code{\link{expand.grid}}) using the data.table package,
+Expand.grid (\code{\link[base]{expand.grid}}) using the
+   \code{\link[data.table]{data.table}} package,
    with up to 4 supplied vectors.
 }
 \examples{

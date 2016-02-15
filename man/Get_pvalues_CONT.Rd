@@ -47,11 +47,11 @@ Get_pvalues_CONT(16, 1, 5, 1, 2, 8, TRUE, FALSE, FALSE)
 Get_pvalues_CONT(158, 14, 52, 12, 23, 78)
 }
 \references{
-\href{http://auai.org/uai2015/proceedings/papers/97.pdf}{
-   Loh, W. W., \& Richardson, T. S. (2015).
+{Loh, W. W., & Richardson, T. S. (2015).
    A Finite Population Likelihood Ratio Test of the
    Sharp Null Hypothesis for Compliers.
    \emph{In Thirty-First Conference on
-   Uncertainty in Artificial Intelligence}.}
+   Uncertainty in Artificial Intelligence}.
+   \href{http://auai.org/uai2015/proceedings/papers/97.pdf}{[paper]}}
 }
 

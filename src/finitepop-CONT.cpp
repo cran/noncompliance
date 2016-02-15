@@ -19,26 +19,7 @@ std::vector<int> MaxOneCell2x2C(int k_int, int b_int, int c_int) {
   }
 }
 
-//' Maximum Likelihood Estimate under the sharp null for Compliers.
-//'
-//' Find the maximum likelihood estimate of the 2 by 4 contingency table
-//'     assuming only Compliers and Never Takers in the population,
-//'     under the sharp null for Compliers
-//'     and with the multivariate hypergeometric sampling distribution.
-//'     This is the C++ function for the R wrapper function
-//'     \code{\link{FindMLE_CONT_H0_hypergeoR}}.
-//'
-//' @param n_y0x0z0 Number of individuals with Y=0, X=0, Z=0.
-//' @param n_y1x0z0 Number of individuals with Y=1, X=0, Z=0.
-//' @param n_y0x0z1 Number of individuals with Y=0, X=0, Z=1.
-//' @param n_y1x0z1 Number of individuals with Y=1, X=0, Z=1.
-//' @param n_y0x1z1 Number of individuals with Y=0, X=1, Z=1.
-//' @param n_y1x1z1 Number of individuals with Y=1, X=1, Z=1.
-//' @return The maximum likelihood under the sharp null for Compliers,
-//'     and the corresponding (possibly non-unique)
-//'     total number of Compliers of response types
-//'     Never Recover and Always Recover.
-// [[Rcpp::export]]
+// [[Rcpp::export(name = ".FindMLE_CONT_H0_hypergeoC")]]
 List FindMLE_CONT_H0_hypergeoC( int n_y0x0z0, int n_y1x0z0,
                                 int n_y0x0z1, int n_y1x0z1,
                                 int n_y0x1z1, int n_y1x1z1 ){
@@ -61,11 +42,32 @@ List FindMLE_CONT_H0_hypergeoC( int n_y0x0z0, int n_y1x0z0,
   return List::create( exp(maxpH0), COmle ) ;
 }
 
+
+double FindMLE_CONT_H0_hypergeoC_qH0( int n_y0x0z0, int n_y1x0z0,
+                                int n_y0x0z1, int n_y1x0z1,
+                                int n_y0x1z1, int n_y1x1z1 ){
+
+  std::vector<int> hatCONRz0 = MaxOneCell2x2C(n_y0x0z0, n_y0x1z1, n_y0x0z1);
+
+  std::vector<int> hatCOARz0 = MaxOneCell2x2C(n_y1x0z0, n_y1x1z1, n_y1x0z1);
+
+  int nz1 = n_y0x0z1 + n_y1x0z1 + n_y0x1z1 + n_y1x1z1;
+
+  double maxpH0 =
+    ::Rf_lchoose(n_y0x0z1 + hatCONRz0[1], n_y0x0z1) +
+    ::Rf_lchoose(n_y0x1z1 + hatCONRz0[0], n_y0x1z1) +
+    ::Rf_lchoose(n_y1x1z1 + hatCOARz0[0], n_y1x1z1) +
+    ::Rf_lchoose(n_y1x0z1 + hatCOARz0[1], n_y1x0z1) -
+    ::Rf_lchoose(nz1 + n_y0x0z0 + n_y1x0z0, nz1) ;
+
+  return exp(maxpH0) ;
+}
+
 std::vector<int> KLargestInt_pq(std::vector<int> vin, int k) {
 
   std::priority_queue< std::pair<int, int> > q;
 
-  for (int i = 0; i < vin.size(); ++i) {
+  for (int i=0, vsz=vin.size(); i<vsz; ++i) {
     q.push( std::pair<int, int>(vin[i], i) );
   }
 
@@ -81,7 +83,7 @@ std::vector<int> KLargest_pq(std::vector<double> vin, int k) {
 
   std::priority_queue< std::pair<double, int> > q;
 
-  for (int i = 0; i < vin.size(); ++i) {
+  for ( int i=0, vsz=vin.size(); i<vsz; ++i) {
     q.push( std::pair<double, int>(vin[i], i) );
   }
 
@@ -105,7 +107,7 @@ std::vector<int> OberhoferAlgoC_int(std::vector<int> nis_i, int Nm_i) {
   double nsum = std::accumulate(nis.begin(), nis.end(), 0.0);
 
   int counter = 0;
-  for (int i = 0; i < k; ++i) {
+  for ( int i = 0; i < k; ++i) {
     jcur[i] += std::max(0.0, ceil( (Nm + 1) * nis[i] / nsum ) - 1.0);
     fij_cur[i] = 1.0 + nis[i] / jcur[i] ;
     counter += jcur[i] - 1.0 ;
@@ -127,25 +129,14 @@ std::vector<int> OberhoferAlgoC_int(std::vector<int> nis_i, int Nm_i) {
   }
 
   std::vector<int> result(jcur.begin(), jcur.end());
-  for (int i = 0; i < k; ++i) {
+  for ( int i = 0; i < k; ++i) {
     result[i]-- ;
   }
 
   return result;
 }
 
-//' Maximum Likelihood Estimate without assuming the sharp null for Compliers.
-//'
-//' Find the maximum likelihood estimate of the 2 by 4 contingency table
-//'     assuming only Compliers and Never Takers in the population,
-//'     with the multivariate hypergeometric sampling distribution.
-//'     This is the C++ function for the R wrapper function
-//'     \code{\link{FindMLE_CONT_H1_hypergeoR}}.
-//'
-//' @inheritParams FindMLE_CONT_H0_hypergeoC
-//' @return The maximum likelihood and the corresponding
-//'     (possibly non-unique) number of Compliers in each Z arm.
-// [[Rcpp::export]]
+// [[Rcpp::export(name = ".FindMLE_CONT_H1_hypergeoC")]]
 List FindMLE_CONT_H1_hypergeoC( int n_y0x0z0, int n_y1x0z0,
                                 int n_y0x0z1, int n_y1x0z1,
                                 int n_y0x1z1, int n_y1x1z1 ) {
@@ -194,21 +185,51 @@ List FindMLE_CONT_H1_hypergeoC( int n_y0x0z0, int n_y1x0z0,
 }
 
 
-//' Finite population sample space given an observed dataset.
-//'
-//' Sample space of all possibly observable datasets given an observed dataset,
-//'     assuming only Compliers and Never Takers in the population.
-//'     This is the C++ function for the R wrapper function
-//'     \code{\link{AllPossiblyObsH0_CONT}}.
-//'
-//' @param obs_y0x0z0 Number of observed individuals with Y=0, X=0, Z=0.
-//' @param obs_y1x0z0 Number of observed individuals with Y=1, X=0, Z=0.
-//' @param obs_y0x0z1 Number of observed individuals with Y=0, X=0, Z=1.
-//' @param obs_y1x0z1 Number of observed individuals with Y=1, X=0, Z=1.
-//' @param obs_y0x1z1 Number of observed individuals with Y=0, X=1, Z=1.
-//' @param obs_y1x1z1 Number of observed individuals with Y=1, X=1, Z=1.
-//' @return All possibly observable datasets in a list format.
-// [[Rcpp::export]]
+
+double FindMLE_CONT_H1_hypergeoC_qH1( int n_y0x0z0, int n_y1x0z0,
+                                int n_y0x0z1, int n_y1x0z1,
+                                int n_y0x1z1, int n_y1x1z1 ) {
+
+  double maxpH1 = 0.0;
+
+  for (int COHEz1=0; COHEz1 <= n_y1x1z1; ++COHEz1) {
+    for (int COHUz1=0; COHUz1 <= n_y0x1z1; ++COHUz1) {
+
+      std::vector<int> y0z1(3);
+      y0z1[0] = n_y0x0z1;
+      y0z1[1] = n_y0x1z1 - COHUz1;
+      y0z1[2] = COHEz1;
+
+      std::vector<int> y0z0hat = OberhoferAlgoC_int( y0z1, n_y0x0z0 ) ;
+
+      std::vector<int>  y1z1(3);
+      y1z1[0] = n_y1x0z1;
+      y1z1[1] = n_y1x1z1 - COHEz1;
+      y1z1[2] = COHUz1;
+
+      std::vector<int> y1z0hat = OberhoferAlgoC_int( y1z1, n_y1x0z0 ) ;
+
+      double maxpH1_cand = 0.0;
+      for (int jj=0; jj < 3; ++jj) {
+        maxpH1_cand = maxpH1_cand +
+          ::Rf_lchoose(y0z0hat[jj] + y0z1[jj], y0z1[jj]) +
+          ::Rf_lchoose(y1z0hat[jj] + y1z1[jj], y1z1[jj]);
+      }
+      if (maxpH1_cand > maxpH1) {
+        maxpH1 = maxpH1_cand;
+      }
+    }
+  }
+
+  int nz1 = n_y0x0z1 + n_y1x0z1 + n_y0x1z1 + n_y1x1z1;
+
+  maxpH1 -= ::Rf_lchoose(nz1 + n_y0x0z0 + n_y1x0z0, nz1) ;
+
+  return exp(maxpH1) ;
+}
+
+
+// [[Rcpp::export(name = ".AllPossiblyObsH0_CONT_C")]]
 List AllPossiblyObsH0_CONT_C(
     int obs_y0x0z0, int obs_y1x0z0,
     int obs_y0x0z1, int obs_y1x0z1, int obs_y0x1z1, int obs_y1x1z1) {
@@ -307,17 +328,7 @@ List AllPossiblyObsH0_CONT_C(
 }
 
 
-//' Finite population sample space given an observed dataset.
-//'
-//' Sample space of all possibly observable datasets given an observed dataset,
-//'     assuming only Compliers and Never Takers in the population.
-//'     The maximum likelihood estimate is also calculated for each dataset.
-//'     This is the C++ function for the R wrapper function
-//'     \code{\link{AllPossiblyObsH0_CONT}}.
-//'
-//' @inheritParams AllPossiblyObsH0_CONT_C
-//' @return All possibly observable datasets in a list format.
-// [[Rcpp::export]]
+// [[Rcpp::export(name = ".AllPossiblyObsH0qH1_CONT_C")]]
 List AllPossiblyObsH0qH1_CONT_C(
     int obs_y0x0z0, int obs_y1x0z0,
     int obs_y0x0z1, int obs_y1x0z1, int obs_y0x1z1, int obs_y1x1z1) {
@@ -341,13 +352,13 @@ List AllPossiblyObsH0qH1_CONT_C(
   OberMap ober;
 
   // Observed value of the GLR
-  List qH0out = FindMLE_CONT_H0_hypergeoC(
+  double qH0out = FindMLE_CONT_H0_hypergeoC_qH0(
     obs_y0x0z0, obs_y1x0z0, obs_y0x0z1, obs_y1x0z1, obs_y0x1z1, obs_y1x1z1 ) ;
 
-  List qH1out = FindMLE_CONT_H1_hypergeoC(
+  double qH1out = FindMLE_CONT_H1_hypergeoC_qH1(
     obs_y0x0z0, obs_y1x0z0, obs_y0x0z1, obs_y1x0z1, obs_y0x1z1, obs_y1x1z1 ) ;
 
-  double obsG = ( (double) qH0out[0] ) / ( (double) qH1out[0] ) *
+  double obsG = ( qH0out ) / ( qH1out ) *
     exp( std::numeric_limits<double>::epsilon() * 1e2 ) ;
 
   std::vector<int> n_y0x0z0_out;
@@ -607,32 +618,7 @@ List AllPossiblyObsH0qH1_CONT_C(
 
 // Finding probabilities under H0 ---------------------------------------------
 
-//' Exact finite population p-values under the sharp null for Compliers.
-//'
-//' Find the exact population-specific p-values
-//'     under the sharp null for Compliers,
-//'     for each compatible population with only Compliers and Never Takers.
-//'     This is the C++ function for the R wrapper function
-//'     \code{\link{Get_pvalues_CONT}}.
-//'
-//' @param n_y0x0z0_H0 Number of individuals with Y=0, X=0, Z=0.
-//' @param n_y1x0z0_H0 Number of individuals with Y=1, X=0, Z=0.
-//' @param n_y0x0z1_H0 Number of individuals with Y=0, X=0, Z=1.
-//' @param n_y1x0z1_H0 Number of individuals with Y=1, X=0, Z=1.
-//' @param n_y0x1z1_H0 Number of individuals with Y=0, X=1, Z=1.
-//' @param n_y1x1z1_H0 Number of individuals with Y=1, X=1, Z=1.
-//' @param n_NTy0_H0 Total number of Never Takers with Y=0.
-//' @param n_CONR_H0 Total number of Compliers of response type
-//'     Never Recover.
-//' @param n_COAR_H0 Total number of Compliers of response type
-//'     Always Recover.
-//' @param n_NTy1_H0 Total number of Never Takers with Y=1.
-//' @param critical_regions Matrix denoting whether each
-//'     possibly observed dataset (rows) is in a critical region
-//'     (columns).
-//' @return A matrix of p-values correspnding to each population
-//'     (row) and the critical region (columns).
-// [[Rcpp::export]]
+// [[Rcpp::export(name = ".GetPvalueshypergeoC_allpsi_CONT")]]
 NumericMatrix GetPvalueshypergeoC_allpsi_CONT(
     std::vector<int> n_y0x0z0_H0, std::vector<int> n_y1x0z0_H0,
     std::vector<int> n_y0x0z1_H0, std::vector<int> n_y1x0z1_H0,
@@ -675,7 +661,7 @@ NumericMatrix GetPvalueshypergeoC_allpsi_CONT(
   NumericMatrix nCk( nCk_dim, nCk_dim );
   std::fill( nCk.begin(), nCk.end(), -1.0 );
 
-  for (int psi=0; psi < psisize; ++psi) {
+  for ( int psi=0; psi < psisize; ++psi) {
 
     std::vector<int> psi_fixed(4);
     psi_fixed[0] = n_NTy0_H0[psi];
@@ -683,7 +669,7 @@ NumericMatrix GetPvalueshypergeoC_allpsi_CONT(
     psi_fixed[2] = n_CONR_H0[psi];
     psi_fixed[3] = n_COAR_H0[psi];
 
-    for (int ii=0; ii < allns; ++ii) {
+    for ( int ii=0; ii < allns; ++ii) {
 
       if ( critical_check[ii] > 0 ) {
 

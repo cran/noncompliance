@@ -3,6 +3,10 @@
 #' @import data.table
 NULL
 
+###############################################################################
+# Without Always Takers (Compliers and Never Takers only)
+###############################################################################
+
 #' Maximum Likelihood Estimate under the sharp null for Compliers.
 #'
 #' Find the maximum likelihood estimate of the 2 by 4 contingency table
@@ -25,7 +29,7 @@ NULL
 FindMLE_CONT_H0_hypergeoR <- function(
   n_y0x0z0, n_y1x0z0, n_y0x0z1, n_y1x0z1, n_y0x1z1, n_y1x1z1) {
 
-  qH0.list <- FindMLE_CONT_H0_hypergeoC(
+  qH0.list <- .FindMLE_CONT_H0_hypergeoC(
     n_y0x0z0, n_y1x0z0, n_y0x0z1, n_y1x0z1, n_y0x1z1, n_y1x1z1)
 
   # Most likely 2x4 table under H0
@@ -54,7 +58,7 @@ FindMLE_CONT_H0_hypergeoR <- function(
 FindMLE_CONT_H1_hypergeoR <- function(
   n_y0x0z0, n_y1x0z0, n_y0x0z1, n_y1x0z1, n_y0x1z1, n_y1x1z1) {
 
-  qH1.list <- FindMLE_CONT_H1_hypergeoC(
+  qH1.list <- .FindMLE_CONT_H1_hypergeoC(
     n_y0x0z0, n_y1x0z0, n_y0x0z1, n_y1x0z1, n_y0x1z1, n_y1x1z1)
 
   # Most likely 2x6 table under H1
@@ -91,7 +95,7 @@ AllPossiblyObsH0_CONT <- function(n_y0x0z0, n_y1x0z0,
 
   if (findGLR == TRUE) {
 
-    obsn_uniques.list <- AllPossiblyObsH0qH1_CONT_C(
+    obsn_uniques.list <- .AllPossiblyObsH0qH1_CONT_C(
         n_y0x0z0, n_y1x0z0, n_y0x0z1, n_y1x0z1, n_y0x1z1, n_y1x1z1)
 
     obsn_uniques <- data.table(do.call(cbind, obsn_uniques.list[1:6]))
@@ -108,7 +112,7 @@ AllPossiblyObsH0_CONT <- function(n_y0x0z0, n_y1x0z0,
 
   } else {
 
-    obsn_uniques.list <- AllPossiblyObsH0_CONT_C(
+    obsn_uniques.list <- .AllPossiblyObsH0_CONT_C(
         n_y0x0z0, n_y1x0z0, n_y0x0z1, n_y1x0z1, n_y0x1z1, n_y1x1z1)
 
     obsn_uniques <- data.table(do.call(cbind, obsn_uniques.list[1:6]))
@@ -126,7 +130,8 @@ AllPossiblyObsH0_CONT <- function(n_y0x0z0, n_y1x0z0,
 
 #' Expand.grid using the data.table package.
 #'
-#' Expand.grid (\code{\link{expand.grid}}) using the data.table package,
+#' Expand.grid (\code{\link[base]{expand.grid}}) using the
+#'    \code{\link[data.table]{data.table}} package,
 #'    with up to 4 supplied vectors.
 #'
 #' @export
@@ -222,12 +227,12 @@ AllColTotalsH0_CONT <- function(
 #' Get_pvalues_CONT(16, 1, 5, 1, 2, 8, TRUE, FALSE)
 #' Get_pvalues_CONT(16, 1, 5, 1, 2, 8, TRUE, FALSE, FALSE)
 #' Get_pvalues_CONT(158, 14, 52, 12, 23, 78)
-#' @references \href{http://auai.org/uai2015/proceedings/papers/97.pdf}{
-#'    Loh, W. W., \& Richardson, T. S. (2015).
+#' @references {Loh, W. W., & Richardson, T. S. (2015).
 #'    A Finite Population Likelihood Ratio Test of the
 #'    Sharp Null Hypothesis for Compliers.
 #'    \emph{In Thirty-First Conference on
-#'    Uncertainty in Artificial Intelligence}.}
+#'    Uncertainty in Artificial Intelligence}.
+#'    \href{http://auai.org/uai2015/proceedings/papers/97.pdf}{[paper]}}
 
 Get_pvalues_CONT <- function(obs_y0x0z0, obs_y1x0z0,
                              obs_y0x0z1, obs_y1x0z1,
@@ -277,7 +282,7 @@ Get_pvalues_CONT <- function(obs_y0x0z0, obs_y1x0z0,
   if ( justexactp == FALSE ) {
 
     if (!exists("obs.G")) {
-      obs.qH1 <- FindMLE_CONT_H1_hypergeoC(
+      obs.qH1 <- .FindMLE_CONT_H1_hypergeoC(
         n_y0x0z0 = obs_y0x0z0, n_y1x0z0 = obs_y1x0z0,
         n_y0x0z1 = obs_y0x0z1, n_y1x0z1 = obs_y1x0z1,
         n_y0x1z1 = obs_y0x1z1, n_y1x1z1 = obs_y1x1z1)[[1]]
@@ -313,7 +318,7 @@ Get_pvalues_CONT <- function(obs_y0x0z0, obs_y1x0z0,
   setkey(coltots_dt)
 
   # p-values
-  pvals_all <- GetPvalueshypergeoC_allpsi_CONT(
+  pvals_all <- .GetPvalueshypergeoC_allpsi_CONT(
     n_y0x0z0_H0 = all_uniques[, n_y0x0z0],
     n_y1x0z0_H0 = all_uniques[, n_y1x0z0],
     n_y0x0z1_H0 = all_uniques[, n_y0x0z1],
@@ -346,3 +351,8 @@ Get_pvalues_CONT <- function(obs_y0x0z0, obs_y1x0z0,
     }
   }
 }
+
+###############################################################################
+# With Always Takers
+###############################################################################
+
